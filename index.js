@@ -33,7 +33,7 @@ module.exports = function (file, opts) {
     stream.push('{\n');
     getdir('controllers', rc.client_controllers); stream.push(',');
     getdir('templates', rc.views);
-    stream.push(',"routes":require("./' + path.relative(vars.__dirname, rc.routes) + '")}');
+    stream.push(',"routes":require("./' + path.relative(vars.__dirname, rc.server_routes) + '")}');
     stream.end(';\n');
 
     return stream;
