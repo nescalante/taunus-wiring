@@ -29,29 +29,27 @@ module.exports = function (file, opts) {
   function wiring() {
     var json;
     var stream = through(write, end);
+    var cwd = process.cwd();
 
     stream.push('{\n');
     getdir('controllers', rc.client_controllers); stream.push(',');
     getdir('templates', rc.views);
-    stream.push(',"routes":require("./' + path.relative(vars.__dirname, rc.server_routes) + '")}');
+    stream.push(',"routes":require("' + path.join(cwd, rc.server_routes).replace(/\\/g, '/') + '")}');
     stream.end(';\n');
 
     return stream;
 
     function getdir(name, dir) {
       var count = 0;
-      var rootDir = path.relative(__dirname, dir).replace(/\\/g, '/') + '/';
+      var root = path.join(cwd, dir).replace(/\\/g, '/') + '/';
 
       stream.push('"' + name + '"' + ':' + '{\n');
-      scandir(dir);
+      scandir(root);
       stream.push('\n}');
 
       function scandir(dir, obj) {
-        var relativeDir = path.relative(vars.__dirname, dir).replace(/\\/g, '/') + '/';
-        var pathDir = path.relative(rootDir, path.join(__dirname, dir)).replace(/\\/g, '/');
-        var files = fs.readdirSync('./' + dir);
-
-        pathDir = pathDir ? pathDir + '/' : '';
+        var relativeDir = path.relative(root, dir).replace(/\\/g, '/') + '/';
+        var files = fs.readdirSync(dir);
 
         if (dir.substring(dir.length - 1, dir.length) !== '/') {
           dir += '/';
@@ -74,17 +72,21 @@ module.exports = function (file, opts) {
             }
 
             if (ext === 'jade') {
-              html = fs.readFileSync('./' + dir + f);
-              fn = jade.compileClient(html, { filename: './' + dir + f });
-              stream.push('"' + pathDir + name + '"' + ':function(locals){var jade=require("jade/runtime");return (' + fn.toString() + ')(locals)}');
+              html = fs.readFileSync(dir + f);
+              fn = jade.compileClient(html, { filename: dir + f });
+              stream.push('"' + relativeDir + name + '"' + ':function(locals){var jade=require("jade/runtime");return (' + fn.toString() + ')(locals)}');
             }
             else {
-              stream.push('"' + pathDir + name + '"' + ':require("./' + relativeDir + f + '")');
+              stream.push('"' + relativeDir + name + '"' + ':require("' + dir + f + '")');
             }
           }
         });
 
         return obj;
+
+        function getPath(currentDir) {
+          path.join(vars.__dirname, currentDir);
+        }
       }
     }
 
