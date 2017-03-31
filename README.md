@@ -1,6 +1,8 @@
 Taunus-wiring
 =============
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/nescalante/taunus-wiring.svg)](https://greenkeeper.io/)
+
 This module is a plugin for [browserify](http://browserify.org/) to generate the [Taunus](https://github.com/taunus/taunus) wiring object.
 
 ## usage
